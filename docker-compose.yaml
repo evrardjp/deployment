@@ -35,22 +35,22 @@ services:
 
 
   front:
-    # build:
-    #   context: ../..
-    #   dockerfile: front/Dockerfile
-    image: thecodingmachine/workadventure-front:master
+    build:
+      context: .
+      dockerfile: front/Dockerfile
+    #image: thecodingmachine/workadventure-front:master
     environment:
-      DEBUG_MODE: "${DEBUG_MODE}"
-      JITSI_URL: "${JITSI_URL}"
-      JITSI_PRIVATE_MODE: "${JITSI_PRIVATE_MODE}"
-      API_URL: "pusher.${DOMAIN}"
+      DEBUG_MODE: "$DEBUG_MODE"
+      JITSI_URL: "$JITSI_URL"
+      JITSI_PRIVATE_MODE: "$JITSI_PRIVATE_MODE"
+      API_URL: "pusher.$DOMAIN"
       # Use TURN_USER/TURN_PASSWORD if your Coturn server is secured via hard coded credentials.
       # Advice: you should instead use Coturn REST API along the TURN_STATIC_AUTH_SECRET in the Back container
       TURN_USER: "$TURN_USER"
       TURN_PASSWORD: "$TURN_PASSWORD"
       START_ROOM_URL: "$START_ROOM_URL"
       UPLOADER_URL: "uploader.$DOMAIN"
-      ADMIN_URL: "$DOMAIN"
+      ADMIN_URL: "api.$DOMAIN"
       STUN_SERVER: "$STUN_SERVER"
       TURN_SERVER: "$TURN_SERVER"
     labels:
@@ -64,10 +64,10 @@ services:
     restart: unless-stopped
 
   pusher:
-    # build:
-    #   context: ../..
-    #   dockerfile: pusher/Dockerfile
-    image: thecodingmachine/workadventure-pusher:master
+    build:
+      context: .
+      dockerfile: pusher/Dockerfile
+    #image: thecodingmachine/workadventure-pusher:master
     command: yarn run runprod
     environment:
       DEBUG: "*"
@@ -89,10 +89,10 @@ services:
     restart: unless-stopped
 
   back:
-    # build:
-    #   context: ../..
-    #   dockerfile: back/Dockerfile
-    image: thecodingmachine/workadventure-back:master
+    build:
+      context: .
+      dockerfile: back/Dockerfile
+    #image: thecodingmachine/workadventure-back:master
     command: yarn run runprod
     environment:
       DEBUG: "*"
@@ -100,7 +100,7 @@ services:
       SECRET_JITSI_KEY: "$SECRET_JITSI_KEY"
       ALLOW_ARTILLERY: "$ALLOW_ARTILLERY"
       ADMIN_API_TOKEN: "$ADMIN_API_TOKEN"
-      ADMIN_API_URL: "$DOMAIN"
+      ADMIN_API_URL: "api.$DOMAIN"
       JITSI_URL: $JITSI_URL
       JITSI_ISS: $JITSI_ISS
       TURN_STATIC_AUTH_SECRET: "$TURN_STATIC_AUTH_SECRET"
@@ -113,10 +113,10 @@ services:
     restart: unless-stopped
 
   uploader:
-    # build:
-    #   context: ../..
-    #   dockerfile: uploader/Dockerfile
-    image: thecodingmachine/workadventure-uploader:master
+    build:
+      context: .
+      dockerfile: uploader/Dockerfile
+    #image: thecodingmachine/workadventure-uploader:master
     environment:
       DEBUG: "*"
     labels:
@@ -127,27 +127,31 @@ services:
       - "traefik.http.routers.uploader.tls.certresolver=myresolver"
     restart: unless-stopped
 
-#  coturn:
-#    image: coturn/coturn:4.5.2
-#    command:
-#      - turnserver
-#      #- -c=/etc/coturn/turnserver.conf
-#      - --log-file=stdout
-#      - --external-ip=$$(detect-external-ip)
-#      - --listening-port=3478
-#      - --min-port=10000
-#      - --max-port=10010
-#      - --tls-listening-port=5349
-#      - --listening-ip=0.0.0.0
-#      - --realm=coturn.$DOMAIN
-#      - --server-name=coturn.$DOMAIN
-#      - --lt-cred-mech
-#      # Enable Coturn "REST API" to validate temporary passwords.
-#      - --use-auth-secret
-#      - --static-auth-secret=$TURN_STATIC_AUTH_SECRET
-#      #- --userdb=/var/lib/turn/turndb
-#      #- --user=$TURN_USER:TURN_PASSWORD
-#      # use real-valid certificate/privatekey files
-#      #- --cert=/root/letsencrypt/fullchain.pem
-#      #- --pkey=/root/letsencrypt/privkey.pem
-#    network_mode: host
+  coturn:
+   image: coturn/coturn:4.5.2
+   command:
+     - turnserver
+     - --log-file=stdout
+
+     - --relay-ip=$TURN_EXTERNAL_IP
+     - --external-ip=$TURN_EXTERNAL_IP
+
+     - --listening-port=3478
+     - --min-port=10000
+     - --max-port=11010
+     - --tls-listening-port=5349
+     - --listening-ip=0.0.0.0
+     - --realm=coturn.$DOMAIN
+     - --server-name=coturn.$DOMAIN
+
+     # Enable Coturn "REST API" to validate temporary passwords.
+     - --use-auth-secret
+     - --static-auth-secret=$TURN_STATIC_AUTH_SECRET
+
+     #- --lt-cred-mech
+     #- --user=$TURN_USER:TURN_PASSWORD
+     #- --userdb=/var/lib/turn/turndb
+     # use real-valid certificate/privatekey files
+     #- --cert=/root/letsencrypt/fullchain.pem
+     #- --pkey=/root/letsencrypt/privkey.pem
+   network_mode: host
