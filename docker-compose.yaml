@@ -44,15 +44,15 @@ services:
       JITSI_URL: "$JITSI_URL"
       JITSI_PRIVATE_MODE: "$JITSI_PRIVATE_MODE"
       API_URL: "pusher.$DOMAIN"
+      STUN_SERVER: "$STUN_SERVER"
       # Use TURN_USER/TURN_PASSWORD if your Coturn server is secured via hard coded credentials.
       # Advice: you should instead use Coturn REST API along the TURN_STATIC_AUTH_SECRET in the Back container
+      TURN_SERVER: "$TURN_SERVER"
       TURN_USER: "$TURN_USER"
       TURN_PASSWORD: "$TURN_PASSWORD"
       START_ROOM_URL: "$START_ROOM_URL"
       UPLOADER_URL: "uploader.$DOMAIN"
       ADMIN_URL: "api.$DOMAIN"
-      STUN_SERVER: "$STUN_SERVER"
-      TURN_SERVER: "$TURN_SERVER"
     labels:
       - "traefik.http.routers.front.rule=Host(`play.$DOMAIN`)"
       - "traefik.http.routers.front.entryPoints=websecure"
@@ -96,7 +96,6 @@ services:
     command: yarn run runprod
     environment:
       DEBUG: "*"
-      SECRET_KEY: "$SECRET_KEY"
       SECRET_JITSI_KEY: "$SECRET_JITSI_KEY"
       ALLOW_ARTILLERY: "$ALLOW_ARTILLERY"
       ADMIN_API_TOKEN: "$ADMIN_API_TOKEN"
@@ -128,30 +127,30 @@ services:
     restart: unless-stopped
 
   coturn:
-   image: coturn/coturn:4.5.2
-   command:
-     - turnserver
-     - --log-file=stdout
+    image: coturn/coturn:4.5.2
+    command:
+      - turnserver
+      - --log-file=stdout
 
-     - --relay-ip=$TURN_EXTERNAL_IP
-     - --external-ip=$TURN_EXTERNAL_IP
+      - --relay-ip=$TURN_EXTERNAL_IP
+      - --external-ip=$TURN_EXTERNAL_IP
 
-     - --listening-port=3478
-     - --min-port=10000
-     - --max-port=11010
-     - --tls-listening-port=5349
-     - --listening-ip=0.0.0.0
-     - --realm=coturn.$DOMAIN
-     - --server-name=coturn.$DOMAIN
+      - --listening-port=3478
+      - --min-port=10000
+      - --max-port=11010
+      - --tls-listening-port=5349
+      - --listening-ip=0.0.0.0
+      - --realm=coturn.$DOMAIN
+      - --server-name=coturn.$DOMAIN
 
-     # Enable Coturn "REST API" to validate temporary passwords.
-     - --use-auth-secret
-     - --static-auth-secret=$TURN_STATIC_AUTH_SECRET
+        # Enable Coturn "REST API" to validate temporary passwords.
+      - --use-auth-secret
+      - --static-auth-secret=$TURN_STATIC_AUTH_SECRET
 
-     #- --lt-cred-mech
-     #- --user=$TURN_USER:TURN_PASSWORD
-     #- --userdb=/var/lib/turn/turndb
-     # use real-valid certificate/privatekey files
-     #- --cert=/root/letsencrypt/fullchain.pem
-     #- --pkey=/root/letsencrypt/privkey.pem
-   network_mode: host
+        #- --lt-cred-mech
+        #- --user=$TURN_USER:TURN_PASSWORD
+        #- --userdb=/var/lib/turn/turndb
+        # use real-valid certificate/privatekey files
+        #- --cert=/root/letsencrypt/fullchain.pem
+        #- --pkey=/root/letsencrypt/privkey.pem
+    network_mode: host
