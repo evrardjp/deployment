@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: pusher
+  name: pusher
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pusher
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: pusher
+    spec:
+      containers:
+        - args:
+            - yarn
+            - run
+            - runprod
+          env:
+            - name: API_URL
+              value: back:50051
+            - name: ADMIN_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: settings
+                  key: ADMIN_API_TOKEN
+                  optional: true
+            - name: ADMIN_API_URL
+              valueFrom:
+                secretKeyRef:
+                  name: settings
+                  key: ADMIN_API_URL
+                  optional: true
+            - name: DEBUG
+              valueFrom:
+                secretKeyRef:
+                  name: settings
+                  key: DEBUG
+                  optional: true
+            - name: JITSI_ISS
+              valueFrom:
+                secretKeyRef:
+                  name: settings
+                  key: JITSI_ISS
+            - name: JITSI_URL
+              valueFrom:
+                secretKeyRef:
+                  name: settings
+                  key: JITSI_URL
+            - name: SECRET_JITSI_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: settings
+                  key: SECRET_JITSI_KEY
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: settings
+                  key: SECRET_KEY
+          image: ghcr.io/workadventure-suse/workadventure-pusher:hackweek-prep
+          name: pusher
+          resources: {}
+      restartPolicy: Always
+status: {}

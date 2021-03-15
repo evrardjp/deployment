@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: uploader
+  name: uploader
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: uploader
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: uploader
+    spec:
+      containers:
+        - env:
+            - name: DEBUG
+              valueFrom:
+                secretKeyRef:
+                  name: settings
+                  key: DEBUG
+                  optional: true
+          image: ghcr.io/workadventure-suse/workadventure-uploader:hackweek-prep
+          name: uploader
+          resources: {}
+      restartPolicy: Always
+status: {}

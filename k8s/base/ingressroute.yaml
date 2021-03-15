@@ -1,0 +1,68 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: front
+  namespace: kube-system
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - match: Host(`play.cluster.local`)
+    kind: Rule
+    services:
+    - name: front
+      port: 80
+  tls:
+    certResolver: myresolver
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: pusher
+  namespace: kube-system
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - match: Host(`pusher.cluster.local`)
+    kind: Rule
+    services:
+    - name: pusher
+      port: 8080
+  tls:
+    certResolver: myresolver
+# ---
+# apiVersion: traefik.containo.us/v1alpha1
+# kind: IngressRoute
+# metadata:
+#   name: back
+#   namespace: kube-system
+# spec:
+#   entryPoints:
+#     - websecure
+#   routes:
+#   - match: Host(`back.cluster.local`)
+#     kind: Rule
+#     services:
+#     - name: back
+#       port: 8080
+#  tls:
+#    certResolver: myresolver
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: uploader
+  namespace: kube-system
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - match: Host(`uploader.cluster.local`)
+    kind: Rule
+    services:
+    - name: uploader
+      port: 80
+  tls:
+    certResolver: myresolver
